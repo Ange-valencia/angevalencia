@@ -41,9 +41,42 @@ class RootGate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    if (auth.restoring) {
+      return const _SplashScreen();
+    }
     if (auth.isLoggedIn) {
       return const HomeShell();
     }
     return const AuthScreen();
+  }
+}
+
+class _SplashScreen extends StatelessWidget {
+  const _SplashScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.beige,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.directions_boat_filled,
+                size: 72, color: AppColors.orange),
+            const SizedBox(height: 16),
+            Text('AngeValencia',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+            const SizedBox(height: 20),
+            const SizedBox(
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(strokeWidth: 3),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

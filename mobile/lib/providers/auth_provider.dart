@@ -12,24 +12,31 @@ class AuthProvider extends ChangeNotifier {
   final ApiClient _api;
   User? _user;
   bool _loading = false;
+  bool _restoring = true;
   String? _error;
 
   User? get user => _user;
   bool get isLoggedIn => _user != null;
   bool get loading => _loading;
+  bool get restoring => _restoring;
   String? get error => _error;
 
   Future<void> _restore() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('av_token');
-    if (token == null) return;
-    _api.setToken(token);
     try {
-      final json = await _api.get('/auth/me');
-      _user = User.fromJson(json);
+      if (token == null) return;
+      _api.setToken(token);
+      try {
+        final json = await _api.get('/auth/me');
+        _user = User.fromJson(json);
+      } catch (e) {
+        await prefs.remove('av_token');
+        _api.clearToken();
+      }
+    } finally {
+      _restoring = false;
       notifyListeners();
-    } catch (e) {
-      await prefs.remove('av_token');
     }
   }
 

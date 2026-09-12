@@ -73,7 +73,7 @@ class _AuthScreenState extends State<AuthScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(Icons.sailing, size: 64, color: AppColors.orange),
+                  const Icon(Icons.directions_boat_filled, size: 64, color: AppColors.orange),
                   const SizedBox(height: 8),
                   Text('AngeValencia',
                       textAlign: TextAlign.center,
@@ -109,7 +109,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         labelText: 'Email ou téléphone (+225)',
-                        prefixIcon: Icon(Icons.alternate_email),
+                        prefixIcon: Icon(Icons.phone),
                       ),
                     ),
                   ] else ...[
@@ -118,7 +118,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         labelText: 'Email ou téléphone',
-                        prefixIcon: Icon(Icons.alternate_email),
+                        prefixIcon: Icon(Icons.phone),
                       ),
                     ),
                   ],
