@@ -25,12 +25,24 @@ VALID_LIVRAISON_STATUSES = {
 }
 
 
+def _identifier_candidates(identifier: str) -> list[str]:
+    """Suppose qu'un numéro local (ex. 0102030405) cache un +225…"""
+    candidates = [identifier]
+    if identifier.startswith("0") and len(identifier) <= 12:
+        candidates += ["+225" + identifier, "225" + identifier]
+    return candidates
+
+
 # ---------------------------------------------------------------- authentification admin
 @router.post("/auth/login", response_model=AuthOut)
 def admin_login(data: AdminLoginIn, db: Session = Depends(get_db)):
-    user = db.query(User).filter(
-        (User.email == data.identifier) | (User.phone == data.identifier)
-    ).first()
+    user = None
+    for candidate in _identifier_candidates(data.identifier):
+        user = db.query(User).filter(
+            (User.email == data.identifier) | (User.phone == candidate)
+        ).first()
+        if user is not None:
+            break
     if user is None or user.role != "admin":
         raise HTTPException(404, "Compte administrateur introuvable")
     if not verify_password(data.password, user.password_hash):

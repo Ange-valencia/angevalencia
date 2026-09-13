@@ -10,6 +10,14 @@ from ..schemas import AuthOut, LoginIn, ProfileUpdateIn, RegisterIn, UserOut
 router = APIRouter()
 
 
+def _identifier_candidates(identifier: str) -> list[str]:
+    """Suppose qu'un numéro local (ex. 0102030405) cache un +225…"""
+    candidates = [identifier]
+    if identifier.startswith("0") and len(identifier) <= 12:
+        candidates += ["+225" + identifier, "225" + identifier]
+    return candidates
+
+
 @router.post("/register", response_model=AuthOut)
 def register(data: RegisterIn, db: Session = Depends(get_db)):
     if data.email is None and data.phone is None:
@@ -37,9 +45,13 @@ def register(data: RegisterIn, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=AuthOut)
 def login(data: LoginIn, db: Session = Depends(get_db)):
-    user = db.query(User).filter(
-        (User.email == data.identifier) | (User.phone == data.identifier)
-    ).first()
+    user = None
+    for candidate in _identifier_candidates(data.identifier):
+        user = db.query(User).filter(
+            (User.email == data.identifier) | (User.phone == candidate)
+        ).first()
+        if user is not None:
+            break
     if user is None or not verify_password(data.password, user.password_hash):
         raise HTTPException(401, "Identifiant ou mot de passe incorrect")
     token = create_access_token(user.id, user.email or user.phone or "", user.role)
