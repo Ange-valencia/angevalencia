@@ -197,6 +197,7 @@ class OrderOut(BaseModel):
     shipping_fee_status: str
     city_id: int | None = None
     company_id: int | None = None
+    user: UserOut | None = None
     items: list[OrderItemOut] = []
     status_history: list[OrderStatusOut] = []
     payments: list[PaymentOut] = []

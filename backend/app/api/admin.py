@@ -44,6 +44,12 @@ def admin_me(user: User = Depends(require_admin)):
     return UserOut.model_validate(user)
 
 
+@router.get("/users", response_model=list[UserOut])
+def list_users(db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    """Liste des clients inscrits (espace admin)."""
+    return db.query(User).filter(User.role == "client").order_by(User.id.desc()).all()
+
+
 # ---------------------------------------------------------------- catégories
 @router.get("/categories", response_model=list[CategoryOut])
 def list_categories(db: Session = Depends(get_db), _: User = Depends(require_admin)):
