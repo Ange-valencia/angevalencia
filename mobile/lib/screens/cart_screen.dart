@@ -11,29 +11,52 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cart = context.watch<CartProvider>();
+    final belowMin = cart.totalXof > 0 && cart.totalXof < minOrderXof;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Mon panier')),
-      body: cart.isEmpty
-          ? const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.shopping_cart_outlined, size: 64, color: AppColors.textMuted),
-                  SizedBox(height: 12),
-                  Text('Votre panier est vide'),
-                ],
-              ),
-            )
-          : ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: cart.lines.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final line = cart.lines[index];
-                return _CartLineTile(line: line);
-              },
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            color: AppColors.orange.withValues(alpha: 0.08),
+            child: Row(
+              children: const [
+                Icon(Icons.info_outline, size: 18, color: AppColors.orangeDark),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text('Commande minimum : 3 000 FCFA',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.textPrimary)),
+                ),
+              ],
             ),
+          ),
+          Expanded(
+            child: cart.isEmpty
+                ? const Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.shopping_cart_outlined, size: 64, color: AppColors.textMuted),
+                        SizedBox(height: 12),
+                        Text('Votre panier est vide'),
+                      ],
+                    ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    itemCount: cart.lines.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final line = cart.lines[index];
+                      return _CartLineTile(line: line);
+                    },
+                  ),
+          ),
+        ],
+      ),
       bottomNavigationBar: cart.isEmpty
           ? null
           : SafeArea(
@@ -53,10 +76,23 @@ class CartScreen extends StatelessWidget {
                                 color: AppColors.orangeDark)),
                       ],
                     ),
+                    if (belowMin) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'Ajoutez encore ${formatXof(minOrderXof - cart.totalXof)} '
+                        'pour atteindre le minimum de commande.',
+                        style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.error,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ],
                     const SizedBox(height: 12),
                     FilledButton(
-                      onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => const CheckoutScreen())),
+                      onPressed: belowMin
+                          ? null
+                          : () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const CheckoutScreen())),
                       child: const Text('Commander'),
                     ),
                     const SizedBox(height: 4),

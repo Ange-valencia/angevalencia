@@ -5,6 +5,7 @@ import '../core/api_client.dart';
 import '../models.dart';
 import '../providers/auth_provider.dart';
 import '../theme.dart';
+import '../widgets/whatsapp_button.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -68,9 +69,11 @@ class _AccountScreenState extends State<AccountScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Mon compte')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      body: Stack(
         children: [
+          ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+            children: [
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -146,6 +149,9 @@ class _AccountScreenState extends State<AccountScreen> {
             onPressed: () => context.read<AuthProvider>().logout(),
             child: const Text('Se déconnecter'),
           ),
+          ],
+          ),
+          const WhatsAppButton(),
         ],
       ),
     );

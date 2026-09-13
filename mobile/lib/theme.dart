@@ -22,6 +22,9 @@ String formatXof(int amount) {
   )} FCFA';
 }
 
+/// Montant minimum de commande.
+const int minOrderXof = 3000;
+
 ThemeData buildAngeValenciaTheme() {
   final base = ThemeData(
     useMaterial3: true,

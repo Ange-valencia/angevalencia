@@ -115,6 +115,9 @@ def create_order(data: OrderCreateIn, user: User = Depends(require_client),
         ))
 
     order.total_product_xof = total
+    if total < settings.min_order_xof:
+        raise HTTPException(
+            400, f"Commande minimum : {settings.min_order_xof:,} FCFA")
     db.add(OrderStatusHistory(order_id=order.id, status="commande_recue",
                               note="Commande reçue, en attente de confirmation du paiement"))
 

@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     # Règle retours (D2) : jours de garde du colis
     collection_grace_days: int = 14
 
+    # Commande minimum (FCFA)
+    min_order_xof: int = 3000
+
     # Compte administrateur créé au premier lancement (scripts/seed_db.py)
     admin_email: str = ""
     admin_phone: str = ""

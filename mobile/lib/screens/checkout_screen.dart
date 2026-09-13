@@ -84,6 +84,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _submit() async {
+    final cart = context.read<CartProvider>();
+    if (cart.totalXof < minOrderXof) {
+      setState(() =>
+          _error = 'Le montant minimum de commande est de 3 000 FCFA');
+      return;
+    }
     if (_city == null) {
       setState(() => _error = 'Choisissez votre ville de récupération');
       return;
