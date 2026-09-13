@@ -1,7 +1,17 @@
 {
-  "functions": {
-    "app/main.py": {
-      "maxDuration": 60
+  "services": {
+    "web": {
+      "root": ".",
+      "entrypoint": "app/main.py"
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": {
+        "type": "service",
+        "service": "web"
+      }
+    }
+  ]
 }
