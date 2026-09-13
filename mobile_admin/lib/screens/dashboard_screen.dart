@@ -6,6 +6,7 @@ import '../theme.dart';
 import 'categories_screen.dart';
 import 'clients_screen.dart';
 import 'orders_screen.dart';
+import 'payment_settings_screen.dart';
 import 'products_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -82,6 +83,14 @@ class DashboardScreen extends StatelessWidget {
                 color: const Color(0xFF6A1B9A),
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
                     builder: (_) => const ClientsScreen())),
+              ),
+              _Tile(
+                icon: Icons.payments_outlined,
+                label: 'Paiements',
+                subtitle: 'Numéros & instruction',
+                color: const Color(0xFF00695C),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const PaymentSettingsScreen())),
               ),
             ],
           ),

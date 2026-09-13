@@ -136,9 +136,21 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: Text(
-                              '${p.type == 'product' ? 'Produit' : 'Transport'} · ${p.method}',
-                              style: const TextStyle(fontSize: 13),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${p.type == 'product' ? 'Produit' : 'Transport'} · ${p.method == 'orange_money' ? 'Orange Money' : 'Wave'}',
+                                  style: const TextStyle(fontSize: 13),
+                                ),
+                                if (p.operatorTransactionId != null)
+                                  Text(
+                                    'Code client : ${p.operatorTransactionId}',
+                                    style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textMuted),
+                                  ),
+                              ],
                             ),
                           ),
                           Text(formatXof(p.amountXof),

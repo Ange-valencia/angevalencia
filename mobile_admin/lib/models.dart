@@ -1,3 +1,48 @@
+class Payment {
+  final int id;
+  final String type;
+  final String method;
+  final int amountXof;
+  final String status;
+  final String? operatorTransactionId;
+
+  Payment({
+    required this.id,
+    required this.type,
+    required this.method,
+    required this.amountXof,
+    required this.status,
+    this.operatorTransactionId,
+  });
+
+  factory Payment.fromJson(Map<String, dynamic> json) => Payment(
+        id: json['id'],
+        type: json['type'],
+        method: json['method'],
+        amountXof: json['amount_xof'],
+        status: json['status'],
+        operatorTransactionId: json['operator_transaction_id'],
+      );
+}
+
+class PaymentConfig {
+  final String? orangeMoneyNumber;
+  final String? waveNumber;
+  final String? instructions;
+
+  PaymentConfig({
+    this.orangeMoneyNumber,
+    this.waveNumber,
+    this.instructions,
+  });
+
+  factory PaymentConfig.fromJson(Map<String, dynamic> json) => PaymentConfig(
+        orangeMoneyNumber: json['orange_money_number'],
+        waveNumber: json['wave_number'],
+        instructions: json['instructions'],
+      );
+}
+
 class AdminUser {
   final int id;
   final String fullName;
@@ -147,30 +192,6 @@ class OrderItem {
         unitPriceXof: json['unit_price_xof'],
         quantity: json['quantity'],
         lineTotalXof: json['line_total_xof'],
-      );
-}
-
-class Payment {
-  final int id;
-  final String type;
-  final String method;
-  final int amountXof;
-  final String status;
-
-  Payment({
-    required this.id,
-    required this.type,
-    required this.method,
-    required this.amountXof,
-    required this.status,
-  });
-
-  factory Payment.fromJson(Map<String, dynamic> json) => Payment(
-        id: json['id'],
-        type: json['type'],
-        method: json['method'],
-        amountXof: json['amount_xof'],
-        status: json['status'],
       );
 }
 

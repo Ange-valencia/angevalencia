@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../core/api_client.dart';
 import '../models.dart';
 import '../theme.dart';
+import '../widgets/payment_instructions.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   const OrderDetailScreen({super.key, required this.orderId});
@@ -107,6 +108,52 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   ],
                 ]),
                 const SizedBox(height: 14),
+                _card('Paiements', [
+                  for (final payment in order.payments.reversed)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          Icon(
+                            payment.status == 'success'
+                                ? Icons.check_circle
+                                : Icons.hourglass_top,
+                            size: 18,
+                            color: payment.status == 'success'
+                                ? AppColors.success
+                                : AppColors.orangeDark,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              '${payment.type == 'shipping' ? 'Frais de transport' : 'Produit'} '
+                              '· ${payment.method == 'orange_money' ? 'Orange Money' : 'Wave'}'
+                              '${payment.operatorTransactionId != null ? '\nCode : ${payment.operatorTransactionId}' : ''}',
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(formatXof(payment.amountXof),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700)),
+                              Text(
+                                _paymentStatusLabel(payment.status),
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: payment.status == 'success'
+                                        ? AppColors.success
+                                        : AppColors.textMuted,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                ]),
+                const SizedBox(height: 14),
                 _card('Historique', [
                   for (final entry in order.statusHistory.reversed)
                     Padding(
@@ -174,6 +221,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     final local = dt.toLocal();
     return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year} '
         '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _paymentStatusLabel(String status) {
+    switch (status) {
+      case 'success':
+        return 'Validé';
+      case 'failed':
+        return 'Échoué';
+      case 'refunded':
+        return 'Remboursé';
+      default:
+        return 'En attente de validation';
+    }
   }
 }
 
@@ -248,7 +308,31 @@ class _ShippingPaymentCard extends StatefulWidget {
 
 class _ShippingPaymentCardState extends State<_ShippingPaymentCard> {
   String _method = 'orange_money';
+  PaymentConfig? _config;
+  final _txCtrl = TextEditingController();
   bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadConfig();
+  }
+
+  Future<void> _loadConfig() async {
+    try {
+      final api = context.read<ApiClient>();
+      final json = await api.get('/payments/config');
+      if (mounted) setState(() => _config = PaymentConfig.fromJson(json));
+    } catch (_) {
+      // La config ne bloque pas le paiement en cas d'échec réseau.
+    }
+  }
+
+  @override
+  void dispose() {
+    _txCtrl.dispose();
+    super.dispose();
+  }
 
   Future<void> _pay() async {
     setState(() => _busy = true);
@@ -256,11 +340,14 @@ class _ShippingPaymentCardState extends State<_ShippingPaymentCard> {
       final api = context.read<ApiClient>();
       await api.post('/orders/${widget.order.id}/pay-shipping', body: {
         'payment_method': _method,
+        'operator_transaction_id': _txCtrl.text.trim().isEmpty
+            ? null
+            : _txCtrl.text.trim(),
       });
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text(
-              'Paiement des frais de transport initié — confirmez sur votre téléphone.')));
+              'Paiement envoyé — un administrateur va vérifier sous peu.')));
       widget.onPaid();
     } catch (e) {
       if (!mounted) return;
@@ -300,6 +387,20 @@ class _ShippingPaymentCardState extends State<_ShippingPaymentCard> {
             ],
             selected: {_method},
             onSelectionChanged: (s) => setState(() => _method = s.first),
+          ),
+          PaymentInstructions(
+            config: _config,
+            method: _method,
+            amountXof: widget.order.shippingFeeXof!,
+          ),
+          const SizedBox(height: 4),
+          TextField(
+            controller: _txCtrl,
+            textCapitalization: TextCapitalization.characters,
+            decoration: const InputDecoration(
+              labelText: 'Code de la transaction reçu',
+              hintText: 'Ex : 2024812345',
+            ),
           ),
           const SizedBox(height: 10),
           SizedBox(

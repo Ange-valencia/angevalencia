@@ -6,6 +6,7 @@ import '../models.dart';
 import '../providers/cart_provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme.dart';
+import '../widgets/payment_instructions.dart';
 import 'order_detail_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -18,9 +19,11 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   List<City>? _cities;
   List<TransportCompany>? _companies;
+  PaymentConfig? _payConfig;
   City? _city;
   TransportCompany? _company;
   String _method = 'orange_money';
+  final _txCtrl = TextEditingController();
   bool _submitting = false;
   String? _error;
 
@@ -28,6 +31,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   void initState() {
     super.initState();
     _loadCities();
+    _loadPayConfig();
+  }
+
+  Future<void> _loadPayConfig() async {
+    try {
+      final api = context.read<ApiClient>();
+      final json = await api.get('/payments/config');
+      if (mounted) setState(() => _payConfig = PaymentConfig.fromJson(json));
+    } catch (e) {
+      // La config ne bloquera pas la commande en cas d'échec réseau.
+    }
   }
 
   Future<void> _loadCities() async {
@@ -63,6 +77,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _txCtrl.dispose();
+    super.dispose();
+  }
+
   Future<void> _submit() async {
     if (_city == null) {
       setState(() => _error = 'Choisissez votre ville de récupération');
@@ -90,6 +110,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         'city_id': _city!.id,
         'company_id': _company!.id,
         'payment_method': _method,
+        'operator_transaction_id': _txCtrl.text.trim().isEmpty
+            ? null
+            : _txCtrl.text.trim(),
       });
       final order = Order.fromJson(json);
       cart.clear();
@@ -161,6 +184,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ],
               selected: {_method},
               onSelectionChanged: (s) => setState(() => _method = s.first),
+            ),
+            PaymentInstructions(
+              config: _payConfig,
+              method: _method,
+              amountXof: cart.totalXof,
+            ),
+            const SizedBox(height: 4),
+            TextField(
+              controller: _txCtrl,
+              textCapitalization: TextCapitalization.characters,
+              decoration: const InputDecoration(
+                labelText: 'Code de la transaction reçu',
+                hintText: 'Ex : 2024812345',
+                helperText:
+                    'Envoie le montant exact au numéro indiqué puis saisis ici le code SMS de paiement.',
+              ),
             ),
           ]),
           const SizedBox(height: 14),

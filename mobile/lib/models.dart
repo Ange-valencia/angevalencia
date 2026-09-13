@@ -191,6 +191,7 @@ class PaymentInfo {
   final String method;
   final int amountXof;
   final String status;
+  final String? operatorTransactionId;
 
   PaymentInfo({
     required this.id,
@@ -198,6 +199,7 @@ class PaymentInfo {
     required this.method,
     required this.amountXof,
     required this.status,
+    this.operatorTransactionId,
   });
 
   factory PaymentInfo.fromJson(Map<String, dynamic> json) => PaymentInfo(
@@ -206,7 +208,32 @@ class PaymentInfo {
         method: json['method'],
         amountXof: json['amount_xof'],
         status: json['status'],
+        operatorTransactionId: json['operator_transaction_id'],
       );
+}
+
+class PaymentConfig {
+  final String? orangeMoneyNumber;
+  final String? waveNumber;
+  final String? instructions;
+
+  PaymentConfig({
+    this.orangeMoneyNumber,
+    this.waveNumber,
+    this.instructions,
+  });
+
+  factory PaymentConfig.fromJson(Map<String, dynamic> json) => PaymentConfig(
+        orangeMoneyNumber: json['orange_money_number'],
+        waveNumber: json['wave_number'],
+        instructions: json['instructions'],
+      );
+
+  String? numberFor(String method) =>
+      method == 'orange_money' ? orangeMoneyNumber : waveNumber;
+
+  String labelFor(String method) =>
+      method == 'orange_money' ? 'Orange Money' : 'Wave';
 }
 
 class Order {
