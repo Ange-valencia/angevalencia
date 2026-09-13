@@ -120,7 +120,8 @@ def create_order(data: OrderCreateIn, user: User = Depends(require_client),
 
     # Paiement 1 (produit) — paiement déclenché côté mobile, statut confirmé au webhook.
     db.add(Payment(order_id=order.id, type="product", method=data.payment_method,
-                   amount_xof=total, status="pending"))
+                   amount_xof=total, status="pending",
+                   operator_transaction_id=data.operator_transaction_id))
 
     _create_notification(
         db, user.id, order.id,
@@ -164,7 +165,8 @@ def pay_shipping(order_id: int, data: ShippingPaymentIn,
         raise HTTPException(400, "Les frais de transport sont déjà payés")
 
     db.add(Payment(order_id=order.id, type="shipping", method=data.payment_method,
-                   amount_xof=order.shipping_fee_xof, status="pending"))
+                   amount_xof=order.shipping_fee_xof, status="pending",
+                   operator_transaction_id=data.operator_transaction_id))
     _create_notification(
         db, user.id, order.id, "Paiement des frais de transport initié",
         f"Paiement de {order.shipping_fee_xof:,} FCFA via {data.payment_method} en attente.")

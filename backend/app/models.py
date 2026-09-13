@@ -232,3 +232,14 @@ class Notification(Base, TimestampMixin):
 
     user: Mapped[User] = relationship(back_populates="notifications")
     order: Mapped[Order | None] = relationship(back_populates="notifications")
+
+
+# ---------------------------------------------------------------- configuration
+class PaymentConfig(Base):
+    """Comptes de réception du mobile money (paiement manuel) — ligne unique id=1."""
+    __tablename__ = "payment_config"
+
+    id: Mapped[int] = mapped_column(primary_key=True)  # toujours 1
+    orange_money_number: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    wave_number: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    instructions: Mapped[str | None] = mapped_column(Text, nullable=True)

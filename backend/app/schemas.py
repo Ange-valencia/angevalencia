@@ -154,6 +154,7 @@ class OrderCreateIn(BaseModel):
     city_id: int
     company_id: int | None = None
     payment_method: str = Field(pattern="^(orange_money|wave)$")
+    operator_transaction_id: str | None = Field(default=None, max_length=100)
 
 
 class OrderItemOut(BaseModel):
@@ -188,6 +189,21 @@ class PaymentOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+# ---------------------------------------------------------------- configuration paiement
+class PaymentConfigOut(BaseModel):
+    orange_money_number: str | None = None
+    wave_number: str | None = None
+    instructions: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class PaymentConfigUpdateIn(BaseModel):
+    orange_money_number: str | None = Field(default=None, max_length=20)
+    wave_number: str | None = Field(default=None, max_length=20)
+    instructions: str | None = None
+
+
 class OrderOut(BaseModel):
     id: int
     code: str
@@ -215,6 +231,7 @@ class OrderStatusUpdateIn(BaseModel):
 
 class ShippingPaymentIn(BaseModel):
     payment_method: str = Field(pattern="^(orange_money|wave)$")
+    operator_transaction_id: str | None = Field(default=None, max_length=100)
 
 
 class PayShippingOut(BaseModel):

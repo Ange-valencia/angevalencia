@@ -11,11 +11,11 @@ from ..core.dependencies import require_admin
 from ..core.security import create_access_token, hash_password, verify_password
 from ..database import get_db
 from ..models import (Category, Notification, Order, OrderItem,
-                      OrderStatusHistory, Payment, Product, ProductImage,
-                      ProductSize, User)
+                      OrderStatusHistory, Payment, PaymentConfig, Product,
+                      ProductImage, ProductSize, User)
 from ..schemas import (AdminLoginIn, AuthOut, CategoryIn, CategoryOut,
-                       OrderOut, OrderStatusUpdateIn, ProductIn, ProductOut,
-                       UserOut)
+                       OrderOut, OrderStatusUpdateIn, PaymentConfigOut,
+                       PaymentConfigUpdateIn, ProductIn, ProductOut, UserOut)
 
 router = APIRouter()
 
@@ -232,8 +232,9 @@ def update_order_status(order_id: int, data: OrderStatusUpdateIn,
 
 def _confirm_payment(db: Session, payment: Payment, operator_transaction_id: str) -> None:
     from datetime import datetime
+    if not payment.operator_transaction_id:
+        payment.operator_transaction_id = operator_transaction_id
     payment.status = "success"
-    payment.operator_transaction_id = operator_transaction_id
     payment.confirmed_at = datetime.now(timezone.utc)
 
 
@@ -259,6 +260,32 @@ def _notify_order_status(db: Session, order: Order, admin: User) -> None:
 
 
 # ---------------------------------------------------------------- paiements (validation manuelle MVP)
+@router.get("/payments/config", response_model=PaymentConfigOut)
+def get_payment_config(db: Session = Depends(get_db),
+                       _: User = Depends(require_admin)):
+    config = db.get(PaymentConfig, 1)
+    if config is None:
+        config = PaymentConfig(id=1)
+        db.add(config)
+        db.commit()
+        db.refresh(config)
+    return PaymentConfigOut.model_validate(config)
+
+
+@router.put("/payments/config", response_model=PaymentConfigOut)
+def update_payment_config(data: PaymentConfigUpdateIn, db: Session = Depends(get_db),
+                          _: User = Depends(require_admin)):
+    config = db.get(PaymentConfig, 1)
+    if config is None:
+        config = PaymentConfig(id=1)
+        db.add(config)
+    for key, value in data.model_dump().items():
+        setattr(config, key, value)
+    db.commit()
+    db.refresh(config)
+    return PaymentConfigOut.model_validate(config)
+
+
 @router.post("/payments/{payment_id}/confirm", response_model=OrderOut)
 def confirm_payment(payment_id: int, db: Session = Depends(get_db),
                     _: User = Depends(require_admin)):

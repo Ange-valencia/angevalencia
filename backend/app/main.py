@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .api import admin, auth, catalog, notifications, orders, transport
+from .api import admin, auth, catalog, notifications, orders, payments, transport
 from .config import settings
 from .database import Base, engine
 from . import models  # noqa: F401  (enregistre les tables)
@@ -28,6 +28,7 @@ app.include_router(transport.router, prefix=f"{prefix}/transport", tags=["transp
 app.include_router(catalog.router, prefix=f"{prefix}/catalog", tags=["catalogue"])
 app.include_router(orders.router, prefix=f"{prefix}/orders", tags=["commandes"])
 app.include_router(notifications.router, prefix=f"{prefix}/notifications", tags=["notifications"])
+app.include_router(payments.router, prefix=f"{prefix}/payments", tags=["paiements"])
 app.include_router(admin.router, prefix=f"{prefix}/admin", tags=["administration"])
 
 
