@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import 'account_screen.dart';
 import 'cart_screen.dart';
+import 'categories_screen.dart';
 import 'home_screen.dart';
 import 'orders_screen.dart';
 
@@ -23,14 +24,16 @@ class _HomeShellState extends State<HomeShell> {
 
     final screens = const [
       HomeScreen(),
+      CategoriesScreen(showAppBar: false),
       OrdersScreen(),
       CartScreen(),
       AccountScreen(),
     ];
 
-    final labels = const ['Accueil', 'Commandes', 'Panier', 'Compte'];
+    final labels = const ['Accueil', 'Catégories', 'Commandes', 'Panier', 'Compte'];
     final icons = const [
       Icons.storefront_outlined,
+      Icons.grid_view_outlined,
       Icons.receipt_long_outlined,
       Icons.shopping_cart_outlined,
       Icons.person_outline,
@@ -46,7 +49,7 @@ class _HomeShellState extends State<HomeShell> {
             NavigationDestination(
               icon: Stack(clipBehavior: Clip.none, children: [
                 Icon(icons[i], color: Colors.white70),
-                if (i == 2 && cart.count > 0)
+                if (i == 3 && cart.count > 0)
                   Positioned(
                     right: -8,
                     top: -6,

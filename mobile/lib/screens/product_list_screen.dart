@@ -8,10 +8,11 @@ import '../widgets/product_card.dart';
 import 'product_detail_screen.dart';
 
 class ProductListScreen extends StatefulWidget {
-  const ProductListScreen({super.key, this.category, this.title});
+  const ProductListScreen({super.key, this.category, this.title, this.query});
 
   final Category? category;
   final String? title;
+  final String? query;
 
   @override
   State<ProductListScreen> createState() => _ProductListScreenState();
@@ -28,15 +29,23 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   Future<List<Product>> _load() async {
     final api = context.read<ApiClient>();
-    final query = widget.category != null ? {'category_id': '${widget.category!.id}'} : null;
-    final json = await api.get('/catalog/products', query: query);
+    final query = <String, dynamic>{
+      if (widget.category != null) 'category_id': '${widget.category!.id}',
+      if (widget.query != null && widget.query!.trim().isNotEmpty)
+        'q': widget.query!.trim(),
+    };
+    final json = await api.get(
+        '/catalog/products', query: query.isEmpty ? null : query);
     return (json as List).map((p) => Product.fromJson(p)).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title ?? widget.category?.name ?? 'Produits')),
+      appBar: AppBar(
+          title: Text(widget.title ??
+              widget.category?.name ??
+              (widget.query != null ? 'Résultats' : 'Produits'))),
       body: FutureBuilder<List<Product>>(
         future: _future,
         builder: (context, snap) {
@@ -50,7 +59,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
           }
           final products = snap.data ?? [];
           if (products.isEmpty) {
-            return const Center(child: Text('Aucun produit dans cette catégorie'));
+            return Center(
+                child: Text(
+                    widget.query != null
+                        ? 'Aucun résultat pour cette recherche'
+                        : 'Aucun produit dans cette catégorie'));
           }
           return GridView.count(
             crossAxisCount: 2,

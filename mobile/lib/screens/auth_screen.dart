@@ -32,7 +32,7 @@ class _AuthScreenState extends State<AuthScreen> {
     final auth = context.read<AuthProvider>();
     final password = _passwordCtrl.text.trim();
     if (password.length != 4) {
-      _snack('Le code PIN doit contenir 4 chiffres');
+      _snack('Le code doit contenir 4 chiffres');
       return;
     }
     bool ok;
@@ -106,10 +106,24 @@ class _AuthScreenState extends State<AuthScreen> {
                     const SizedBox(height: 14),
                     TextField(
                       controller: _emailCtrl,
-                      keyboardType: TextInputType.emailAddress,
+                      keyboardType: TextInputType.phone,
                       decoration: const InputDecoration(
-                        labelText: 'Email ou téléphone (+225)',
-                        prefixIcon: Icon(Icons.phone),
+                        labelText: 'Téléphone ou email',
+                        prefixIconConstraints: BoxConstraints(minWidth: 92),
+                        prefixIcon: Padding(
+                          padding: EdgeInsets.only(left: 12),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('🇨🇮', style: TextStyle(fontSize: 18)),
+                              SizedBox(width: 6),
+                              Text('+225',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textMuted)),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ] else ...[
@@ -129,9 +143,9 @@ class _AuthScreenState extends State<AuthScreen> {
                     keyboardType: TextInputType.number,
                     maxLength: 4,
                     decoration: InputDecoration(
-                      labelText: 'Code PIN (4 chiffres)',
+                      labelText: 'Code',
+                      hintText: '••••',
                       counterText: '',
-                      prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
                             _obscurePin ? Icons.visibility_off : Icons.visibility),
